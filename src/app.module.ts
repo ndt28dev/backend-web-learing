@@ -1,9 +1,19 @@
-import { Module } from '@nestjs/common';
+import { Module, Res } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { UsersModule } from './modules/users/users.module';
+import { Restaurant } from './modules/restaurants/schemas/restaurant.schema';
+import { RestaurantsModule } from './modules/restaurants/restaurants.module';
+import { MenusModule } from './modules/menus/menus.module';
+import { MenuItemsModule } from './modules/menu.items/menu.items.module';
+import { MenuItemOptionsModule } from './modules/menu.item.options/menu.item.options.module';
+import { Review } from './modules/reviews/schemas/review.schema';
+import { ReviewsModule } from './modules/reviews/reviews.module';
+import { OrdersModule } from './modules/orders/orders.module';
+import { OrderDetailModule } from './modules/order.detail/order.detail.module';
+import { LikesModule } from './modules/likes/likes.module';
 
 @Module({
   imports: [
@@ -11,6 +21,14 @@ import { MongooseModule } from '@nestjs/mongoose';
       isGlobal: true, // để dùng toàn dự án
     }),
     UsersModule,
+    RestaurantsModule,
+    MenusModule,
+    MenuItemsModule,
+    MenuItemOptionsModule,
+    ReviewsModule,
+    OrdersModule,
+    OrderDetailModule,
+    LikesModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

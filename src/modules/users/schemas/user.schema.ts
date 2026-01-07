@@ -3,58 +3,40 @@ import { Document } from 'mongoose';
 
 export type UserDocument = User & Document;
 
-export enum AccountType {
-  LOCAL = 'local',
-  GOOGLE = 'google',
-  FACEBOOK = 'facebook',
-}
-
-export enum UserRole {
-  USER = 'user',
-  ADMIN = 'admin',
-}
-
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ required: true })
+  @Prop()
   name: string;
 
-  @Prop({ required: true, unique: true, lowercase: true, trim: true })
+  @Prop()
   email: string;
 
   @Prop()
-  password?: string;
+  password: string;
 
   @Prop()
-  phone?: string;
+  phone: string;
 
   @Prop()
-  address?: string;
+  address: string;
 
   @Prop()
-  image?: string; // url hoặc path
+  image: string;
 
-  @Prop({ enum: AccountType, default: AccountType.LOCAL })
-  account_type?: AccountType;
+  @Prop({ default: 'USERS' })
+  account_type: string;
 
-  @Prop({ enum: UserRole, default: UserRole.USER })
-  role?: UserRole;
+  @Prop({ default: 'LOCAL' })
+  role: string;
 
-  @Prop({ default: true })
-  is_active?: boolean;
-
-  @Prop()
-  code_id?: string; // mã xác thực (ví dụ OTP, reset token id)
+  @Prop({ default: false })
+  is_active: boolean;
 
   @Prop()
-  code_expired?: Date; // thời hạn hết hạn của code
+  code_id: string;
+
+  @Prop()
+  code_expired: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-
-// Không expose password khi toObject / toJSON
-UserSchema.methods.toJSON = function () {
-  const obj = this.toObject();
-  delete obj.password;
-  return obj;
-};

@@ -5,10 +5,17 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
 import mongoose, { Model } from 'mongoose';
 import { hashPasswordHelper } from '../../helpers/util';
+import { CreateAuthDto } from '../../auth/dto/create-auth.dto';
+import { v4 as uuidv4 } from 'uuid';
+import dayjs from 'dayjs';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    private readonly mailerService: MailerService,
+  ) {}
 
   isEmailExists = async (email: string) => {
     const user = await this.userModel.exists({ email });
@@ -81,5 +88,37 @@ export class UsersService {
     } else {
       throw new BadRequestException('ID khong hop le');
     }
+  }
+
+  async handleRegister(registerDto: CreateAuthDto) {
+    const isExist = await this.isEmailExists(registerDto.email);
+    if (isExist) {
+      throw new BadRequestException('Email đã tồn tại');
+    }
+    const hashPassword = await hashPasswordHelper(registerDto.password);
+    const codeId = uuidv4();
+    const user = await this.userModel.create({
+      ...registerDto,
+      password: hashPassword,
+      is_active: false,
+      code_id: codeId,
+      // code_expired: dayjs().add(5, 'minutes'),
+      code_expired: dayjs().add(30, 'seconds'),
+    });
+    //send email
+    this.mailerService.sendMail({
+      to: user.email, // list of receivers
+      subject: 'Activate your account at @ndt28dev', // Subject line
+      template: 'register', // `.hbs` extension is appended automatically
+      context: {
+        name: user?.name ?? user?.email,
+        activationCode: codeId,
+      },
+    });
+
+    // trả ra phản hồi
+    return {
+      _id: user._id,
+    };
   }
 }

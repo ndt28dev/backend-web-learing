@@ -14,6 +14,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException();
     }
+    if (!user.is_active)
+      throw new UnauthorizedException('Tài khoản chưa được kích hoạt');
     return user;
   }
 }

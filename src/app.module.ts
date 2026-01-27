@@ -4,21 +4,13 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './modules/users/users.module';
-import { Restaurant } from './modules/restaurants/schemas/restaurant.schema';
-import { RestaurantsModule } from './modules/restaurants/restaurants.module';
-import { MenusModule } from './modules/menus/menus.module';
-import { MenuItemsModule } from './modules/menu.items/menu.items.module';
-import { MenuItemOptionsModule } from './modules/menu.item.options/menu.item.options.module';
-import { Review } from './modules/reviews/schemas/review.schema';
-import { ReviewsModule } from './modules/reviews/reviews.module';
-import { OrdersModule } from './modules/orders/orders.module';
-import { OrderDetailModule } from './modules/order.detail/order.detail.module';
-import { LikesModule } from './modules/likes/likes.module';
 import { AuthModule } from './auth/auth.module';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/passport/jwt-auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { TransformInterceptor } from './core/transform.interceptor';
+import { UserAccountModule } from './modules/user_account/user_account.module';
 
 @Module({
   imports: [
@@ -26,15 +18,9 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
       isGlobal: true, // để dùng toàn dự án
     }),
     UsersModule,
-    RestaurantsModule,
-    MenusModule,
-    MenuItemsModule,
-    MenuItemOptionsModule,
-    ReviewsModule,
-    OrdersModule,
-    OrderDetailModule,
+    UserAccountModule,
+
     AuthModule,
-    LikesModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -76,6 +62,10 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformInterceptor,
     },
   ],
 })

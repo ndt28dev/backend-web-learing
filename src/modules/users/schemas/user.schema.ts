@@ -12,31 +12,27 @@ export class User {
   email: string;
 
   @Prop()
-  password: string;
-
-  @Prop()
   phone: string;
 
   @Prop()
   address: string;
 
+  // MALE | FEMALE
   @Prop()
-  image: string;
+  gender: string;
 
-  @Prop({ default: 'USERS' })
-  account_type: string;
+  @Prop()
+  birthday: string;
 
-  @Prop({ default: 'LOCAL' })
+  @Prop()
+  avatar: string;
+
+  // admin | teacher | student
+  @Prop({ default: 'STUDENT' })
   role: string;
 
-  @Prop({ default: false })
-  is_active: boolean;
-
-  @Prop()
-  code_id: string;
-
-  @Prop()
-  code_expired: Date;
+  @Prop({ default: true })
+  is_hidden: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

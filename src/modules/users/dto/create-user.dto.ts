@@ -1,26 +1,29 @@
-import { Prop } from '@nestjs/mongoose';
 import {
   IsEmail,
-  IsEmpty,
   IsNotEmpty,
   IsOptional,
+  IsPhoneNumber,
   IsString,
 } from 'class-validator';
 
 export class CreateUserDto {
-  @IsNotEmpty({ message: 'Name không được để trống' })
+  @IsNotEmpty({ message: 'Họ và tên không được để trống' })
   name: string;
 
   @IsNotEmpty({ message: 'Email không được để trống' })
   @IsEmail({}, { message: 'Email không đúng định dạng' })
   email: string;
 
-  @IsNotEmpty({ message: 'Password không được để trống' })
-  password: string;
+  @IsNotEmpty({ message: 'Số điện thoại không được để trống' })
+  @IsPhoneNumber('VN', { message: 'Số điện thoại không đúng định dạng' })
+  phone: string;
+
+  @IsNotEmpty({ message: 'Giới tính không được để trống' })
+  gender: string;
 
   @IsOptional()
   @IsString()
-  phone?: string;
+  birthday: string;
 
   @IsOptional()
   @IsString()
@@ -28,5 +31,5 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  image?: string;
+  avatar?: string;
 }

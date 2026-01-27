@@ -1,6 +1,10 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from '../auth.service';
 
 @Injectable()
@@ -10,12 +14,13 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(username: string, password: string): Promise<any> {
-    const user = await this.authService.validateUser(username, password);
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-    if (!user.is_active)
-      throw new UnauthorizedException('Tài khoản chưa được kích hoạt');
+    // const user = await this.authService.validateUser(username, password);
+    const user = null;
+    // if (!user) {
+    //   throw new UnauthorizedException('Username/Password không hợp lệ');
+    // }
+    // if (!user.is_active)
+    //   throw new ForbiddenException('Tài khoản chưa được kích hoạt');
     return user;
   }
 }

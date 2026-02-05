@@ -10,6 +10,9 @@ export class UserAccount {
   user: mongoose.Schema.Types.ObjectId;
 
   @Prop()
+  username: string;
+
+  @Prop()
   password: string;
 
   @Prop({ default: 'LOCAL' })

@@ -41,7 +41,7 @@ export class UsersService {
       ...createUserDto,
     });
 
-    await this.userAccountService.createForUser(user._id, '123456');
+    await this.userAccountService.createForUser(user._id, user.code, '123456');
 
     return {
       _id: user._id,

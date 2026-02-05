@@ -14,6 +14,9 @@ export class UpdateUserDto {
   @IsNotEmpty({ message: 'ID khong duoc de trong' })
   _id: string;
 
+  @IsNotEmpty({ message: 'Code không được để trống' })
+  code: string;
+
   @IsNotEmpty({ message: 'Họ và tên không được để trống' })
   name: string;
 
@@ -28,19 +31,14 @@ export class UpdateUserDto {
   @IsNotEmpty({ message: 'Giới tính không được để trống' })
   gender: string;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'Ngày sinh không được để trống' })
   @IsDateString({}, { message: 'Ngày sinh không hợp lệ' })
   birthday: string;
 
-  @IsOptional()
-  @IsString()
+  @IsNotEmpty({ message: 'Địa chỉ không được để trống' })
   address?: string;
 
   @IsOptional()
   @IsString()
   avatar?: string;
-
-  @IsOptional()
-  @IsString()
-  role?: string;
 }

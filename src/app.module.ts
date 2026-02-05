@@ -11,6 +11,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { TransformInterceptor } from './core/transform.interceptor';
 import { UserAccountModule } from './modules/user_account/user_account.module';
+import { Student } from './modules/students/entities/student.schema';
+import { StudentsModule } from './modules/students/students.module';
 
 @Module({
   imports: [
@@ -19,7 +21,7 @@ import { UserAccountModule } from './modules/user_account/user_account.module';
     }),
     UsersModule,
     UserAccountModule,
-
+    StudentsModule,
     AuthModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

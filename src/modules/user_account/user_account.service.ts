@@ -15,11 +15,19 @@ export class UserAccountService {
     private readonly userAccountModel: Model<UserAccountDocument>,
   ) {}
 
-  async createForUser(userId: Types.ObjectId, password: string) {
+  async createForUser(
+    userId: Types.ObjectId,
+    username: string,
+    password: string,
+  ) {
     return this.userAccountModel.create({
       user: userId,
+      username: username,
       password,
       account_type: 'LOCAL',
+      is_active: false,
+      // code_id: uuidv4(),
+      // code_expired: dayjs().add(1, 'day').format('YYYY-MM-DD'),
     });
   }
 

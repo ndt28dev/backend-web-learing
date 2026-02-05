@@ -6,6 +6,9 @@ export type UserDocument = User & Document;
 @Schema({ timestamps: true })
 export class User {
   @Prop()
+  code: string;
+
+  @Prop()
   name: string;
 
   @Prop()
@@ -27,8 +30,7 @@ export class User {
   @Prop()
   avatar: string;
 
-  // admin | teacher | student
-  @Prop({ default: 'STUDENT' })
+  @Prop()
   role: string;
 
   @Prop({ default: true })

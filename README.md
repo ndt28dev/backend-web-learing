@@ -10,15 +10,9 @@ Backend quản lý học viên xây dựng bằng **NestJS + MongoDB**, hỗ tr�
 ---
 
 ## 🚀 Công nghệ sử dụng
-
-- **Node.js**
 - **NestJS**
 - **MongoDB + Mongoose**
 - **TypeScript**
-- **xlsx** (import / export Excel)
-- **class-validator / class-transformer**
 
----
 
-## 📁 Cấu trúc thư mục (rút gọn)
 

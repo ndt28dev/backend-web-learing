@@ -10,9 +10,10 @@ import { JwtAuthGuard } from './auth/passport/jwt-auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { TransformInterceptor } from './core/transform.interceptor';
-import { UserAccountModule } from './modules/user_account/user_account.module';
 import { Student } from './modules/students/entities/student.schema';
 import { StudentsModule } from './modules/students/students.module';
+import { RolesModule } from './modules/roles/roles.module';
+import { AccountStudentsModule } from './modules/account_students/account_students.module';
 
 @Module({
   imports: [
@@ -20,9 +21,10 @@ import { StudentsModule } from './modules/students/students.module';
       isGlobal: true, // để dùng toàn dự án
     }),
     UsersModule,
-    UserAccountModule,
     StudentsModule,
+    RolesModule,
     AuthModule,
+    AccountStudentsModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

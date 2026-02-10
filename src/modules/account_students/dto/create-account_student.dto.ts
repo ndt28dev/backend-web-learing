@@ -23,3 +23,20 @@ export class CreateAccountStudentDto {
   @IsString()
   code_expired?: string;
 }
+
+export class ChangePasswordAccountStudentDto {
+  @IsNotEmpty({ message: '_id không được bỏ trống' })
+  _id!: string;
+
+  @IsNotEmpty({ message: 'Tài khoản không được bỏ trống' })
+  username!: string;
+
+  @IsNotEmpty({ message: 'Mật khẩu cũ không được bỏ trống' })
+  oldPassword!: string;
+
+  @IsNotEmpty({ message: 'Mật khẩu mới không được bỏ trống' })
+  newPassword!: string;
+
+  @IsNotEmpty({ message: 'Mật khẩu xác nhận mật khẩu không được bỏ trống' })
+  confirmPassword!: string;
+}

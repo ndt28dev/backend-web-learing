@@ -11,6 +11,8 @@ import {
   REQUIRED_COLUMNS,
   STUDENT_COLUMNS,
 } from './constants/student-import.constant';
+import { hashPasswordHelper } from '../../helpers/util';
+import { AccountStudentDocument } from '../account_students/entities/account_student.schema';
 
 @Injectable()
 export class StudentsService {
@@ -50,10 +52,12 @@ export class StudentsService {
       ...createStudentDto,
     });
 
+    const hashPassword = (await hashPasswordHelper('123456')) as string;
+
     await this.accountStudentsService.createForStudent({
       student: student._id.toString(),
       username: student.code,
-      password: '123456',
+      password: hashPassword,
     });
 
     return {
@@ -82,7 +86,6 @@ export class StudentsService {
       .limit(pageSize)
       .skip(skip)
       .sort(sort as any)
-      .select('-password')
       .exec();
     return { results, totalPages, total: totalItems };
   }
@@ -287,7 +290,18 @@ export class StudentsService {
     // ===============================
     // 5️⃣ INSERT DB
     // ===============================
-    await this.studentsModel.insertMany(students);
+    const studentsAdd = await this.studentsModel.insertMany(students);
+
+    const defaultPassword = (await hashPasswordHelper('123456')) as string;
+
+    const accountStudents = studentsAdd.map((student) => ({
+      student: student._id,
+      username: student.code,
+      password: defaultPassword,
+      is_active: false,
+    }));
+
+    await this.accountStudentsService.insertMany(accountStudents);
 
     return {
       total: students.length,

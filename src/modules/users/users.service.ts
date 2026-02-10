@@ -13,14 +13,12 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import { MailerService } from '@nestjs-modules/mailer';
-import { UserAccountService } from '../user_account/user_account.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private readonly mailerService: MailerService,
-    private readonly userAccountService: UserAccountService,
   ) {}
 
   isEmailExists = async (email: string) => {
@@ -40,8 +38,6 @@ export class UsersService {
     const user = await this.userModel.create({
       ...createUserDto,
     });
-
-    await this.userAccountService.createForUser(user._id, user.code, '123456');
 
     return {
       _id: user._id,

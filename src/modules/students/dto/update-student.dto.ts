@@ -9,8 +9,8 @@ import {
 } from 'class-validator';
 
 export class UpdateStudentDto {
-  @IsMongoId({ message: 'ID khong hop le' })
-  @IsNotEmpty({ message: 'ID khong duoc de trong' })
+  @IsMongoId({ message: 'ID không hợp lệ' })
+  @IsNotEmpty({ message: 'ID không được để trống' })
   _id!: string;
 
   @IsNotEmpty({ message: 'Code không được để trống' })

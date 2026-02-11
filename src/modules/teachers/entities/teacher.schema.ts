@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-export type StudentDocument = Student & Document;
+export type TeacherDocument = Teacher & Document;
 
 @Schema({ timestamps: true })
-export class Student {
+export class Teacher {
   @Prop({ required: true, unique: true, trim: true })
   code!: string;
 
@@ -28,22 +28,29 @@ export class Student {
   @Prop()
   avatar!: string;
 
-  @Prop({
-    enum: ['PRIMARY', 'SECONDARY', 'HIGH_SCHOOL', 'UNIVERSITY'],
-  })
-  educationLevel!: string;
+  @Prop()
+  degree!: string;
 
   @Prop()
-  educationClass!: string;
+  specialization!: string;
 
   @Prop()
-  educationSchool!: string;
+  university!: string;
 
-  @Prop({ default: 'STUDENT' })
+  @Prop()
+  experience!: string;
+
+  @Prop()
+  achievements!: string;
+
+  @Prop()
+  description!: string;
+
+  @Prop({ default: 'TEACHER' })
   role!: string;
 
   @Prop({ default: true })
   is_hidden!: boolean;
 }
 
-export const StudentSchema = SchemaFactory.createForClass(Student);
+export const TeacherSchema = SchemaFactory.createForClass(Teacher);

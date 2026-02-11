@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
@@ -53,13 +54,28 @@ export class RolesService {
       .limit(pageSize)
       .skip(skip)
       .sort(sort as any)
-      .select('-password')
       .exec();
     return { results, totalPages, total: totalItems };
   }
 
   findOne(id: number) {
     return `This action returns a #${id} role`;
+  }
+
+  async getRoleIdIfExists(code: string): Promise<string | null> {
+    if (!code) return null;
+
+    const role = await this.rolesModel.findOne({ code }).select('_id').lean();
+
+    return role ? role._id.toString() : null;
+  }
+
+  async getRoleNameById(id: string): Promise<string | null> {
+    if (!id) return null;
+
+    const role = await this.rolesModel.findById(id).select('name').lean();
+
+    return role ? role.name : null;
   }
 
   async update(updateRoleDto: UpdateRoleDto) {

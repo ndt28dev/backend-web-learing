@@ -18,6 +18,7 @@ import { UpdateStudentDto } from './dto/update-student.dto';
 import { Public } from '../../decorator/customize';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
+import { Multer } from 'multer';
 
 @Controller('students')
 export class StudentsController {

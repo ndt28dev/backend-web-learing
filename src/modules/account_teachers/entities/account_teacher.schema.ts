@@ -1,13 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
-import { Student } from '../../students/entities/student.schema';
+import { Teacher } from '../../teachers/entities/teacher.schema';
 
-export type AccountStudentDocument = AccountStudent & Document;
+export type AccountTeacherDocument = AccountTeacher & Document;
 
 @Schema({ timestamps: true })
-export class AccountStudent {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Student.name })
-  student!: mongoose.Schema.Types.ObjectId;
+export class AccountTeacher {
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Teacher.name })
+  teacher!: mongoose.Schema.Types.ObjectId;
 
   @Prop()
   username!: string;
@@ -28,5 +28,5 @@ export class AccountStudent {
   is_hidden!: boolean;
 }
 
-export const AccountStudentSchema =
-  SchemaFactory.createForClass(AccountStudent);
+export const AccountTeacherSchema =
+  SchemaFactory.createForClass(AccountTeacher);

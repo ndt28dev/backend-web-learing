@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CreateTeacherDto {
+export class CreateEmployeeDto {
   @IsNotEmpty({ message: 'Code không được để trống' })
   code!: string;
 
@@ -32,25 +32,8 @@ export class CreateTeacherDto {
   @IsNotEmpty({ message: 'Địa chỉ không được để trống' })
   address!: string;
 
-  @IsNotEmpty({ message: 'Bằng cấp không được để trống' })
-  degree!: string;
-
-  @IsNotEmpty({ message: 'Chuyên môn không được để trống' })
-  specialization!: string;
-
-  @IsNotEmpty({ message: 'Trường đại học không được để trống' })
-  university?: string;
-
-  @IsNotEmpty({ message: 'Kinh nghiệm không được để trống' })
-  experience?: string;
-
-  @IsOptional()
-  @IsString()
-  achievements?: string;
-
-  @IsOptional()
-  @IsString()
-  description?: string;
+  @IsNotEmpty({ message: 'Vai trò không được để trống' })
+  role!: string;
 
   @IsOptional()
   @IsString()

@@ -1,9 +1,9 @@
 import { IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class CreateAccountTeacherDto {
-  @IsNotEmpty({ message: 'teacherId không được để trống' })
+export class CreateAccountEmployeeDto {
+  @IsNotEmpty({ message: 'employeeId không được để trống' })
   @IsMongoId()
-  teacher!: string;
+  employee!: string;
 
   @IsNotEmpty({ message: 'Tài khoản không được để trống' })
   username!: string;
@@ -23,7 +23,7 @@ export class CreateAccountTeacherDto {
   code_expired?: string;
 }
 
-export class ChangePasswordAccountTeacherDto {
+export class ChangePasswordAccountEmployeeDto {
   @IsNotEmpty({ message: '_id không được bỏ trống' })
   _id!: string;
 

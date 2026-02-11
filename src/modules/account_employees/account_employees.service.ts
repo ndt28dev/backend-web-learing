@@ -4,30 +4,28 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
-  ChangePasswordAccountStudentDto,
-  CreateAccountStudentDto,
-} from './dto/create-account_student.dto';
-import { UpdateAccountStudentDto } from './dto/update-account_student.dto';
-import {
-  AccountStudent,
-  AccountStudentDocument,
-} from './entities/account_student.schema';
-import mongoose, { Model, Types } from 'mongoose';
+  ChangePasswordAccountEmployeeDto,
+  CreateAccountEmployeeDto,
+} from './dto/create-account_employee.dto';
+import { UpdateAccountEmployeeDto } from './dto/update-account_employee.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { ChangePasswordAuthDto } from '../../auth/dto/create-auth.dto';
-import dayjs from 'dayjs';
+import {
+  AccountEmployee,
+  AccountEmployeeDocument,
+} from './entities/account_employee.schema';
+import mongoose, { Model } from 'mongoose';
 import { comparePasswordHelper, hashPasswordHelper } from '../../helpers/util';
 
 @Injectable()
-export class AccountStudentsService {
+export class AccountEmployeesService {
   constructor(
-    @InjectModel(AccountStudent.name)
-    private readonly accountStudentModel: Model<AccountStudentDocument>,
+    @InjectModel(AccountEmployee.name)
+    private readonly accountEmployeeModel: Model<AccountEmployeeDocument>,
   ) {}
 
-  async createForStudent(createAccountStudentDto: CreateAccountStudentDto) {
-    return this.accountStudentModel.create({
-      student: createAccountStudentDto.student,
+  async createForStudent(createAccountStudentDto: CreateAccountEmployeeDto) {
+    return this.accountEmployeeModel.create({
+      employee: createAccountStudentDto.employee,
       username: createAccountStudentDto.username,
       password: createAccountStudentDto.password,
       is_active: false,
@@ -36,12 +34,12 @@ export class AccountStudentsService {
     });
   }
 
-  create(createAccountStudentDto: CreateAccountStudentDto) {
-    return 'This action adds a new accountStudent';
+  create(createAccountEmployeeDto: CreateAccountEmployeeDto) {
+    return 'This action adds a new accountEmployee';
   }
 
   async insertMany(accounts: any) {
-    return this.accountStudentModel.insertMany(accounts);
+    return this.accountEmployeeModel.insertMany(accounts);
   }
 
   async findAll(query: string, current: number, pageSize: number) {
@@ -56,28 +54,28 @@ export class AccountStudentsService {
     if (!current) current = 1;
     if (!pageSize) pageSize = 10;
 
-    const totalItems = (await this.accountStudentModel.find(filter)).length;
+    const totalItems = (await this.accountEmployeeModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / pageSize);
     const skip = (+current - 1) * pageSize;
 
-    const results = await this.accountStudentModel
+    const results = await this.accountEmployeeModel
       .find(filter)
       .limit(pageSize)
       .skip(skip)
       .sort(sort as any)
       .select('-password')
-      .populate('student')
+      .populate('employee')
       .exec();
     return { results, totalPages, total: totalItems };
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} accountStudent`;
+    return `This action returns a #${id} accountEmployee`;
   }
 
-  async findOneByUsernameAndByStudentId(studentId: string, username: string) {
-    const account = await this.accountStudentModel.findOne({
-      student: studentId,
+  async findOneByUsernameAndByEmployeeId(employeeId: string, username: string) {
+    const account = await this.accountEmployeeModel.findOne({
+      employee: employeeId,
       username,
     });
 
@@ -88,38 +86,38 @@ export class AccountStudentsService {
     return account;
   }
 
-  update(id: number, updateAccountStudentDto: UpdateAccountStudentDto) {
-    return `This action updates a #${id} accountStudent`;
+  update(id: number, updateAccountEmployeeDto: UpdateAccountEmployeeDto) {
+    return `This action updates a #${id} accountEmployee`;
   }
 
   async updateIsHidden(id: string, isHidden: boolean) {
-    return this.accountStudentModel.updateOne(
+    return this.accountEmployeeModel.updateOne(
       { _id: id },
       { is_hidden: isHidden },
     );
   }
 
   async updateManyIsHidden(ids: string[], isHidden: boolean) {
-    return this.accountStudentModel.updateMany(
+    return this.accountEmployeeModel.updateMany(
       { _id: { $in: ids } },
       { $set: { is_hidden: isHidden } },
     );
   }
 
   async remove(id: string) {
-    return this.accountStudentModel.deleteOne({ _id: id });
+    return this.accountEmployeeModel.deleteOne({ _id: id });
   }
 
   async removeMany(ids: string[]) {
-    return this.accountStudentModel.deleteMany({ _id: { $in: ids } });
+    return this.accountEmployeeModel.deleteMany({ _id: { $in: ids } });
   }
 
-  async changePassword(data: ChangePasswordAccountStudentDto) {
+  async changePassword(data: ChangePasswordAccountEmployeeDto) {
     if (!mongoose.isValidObjectId(data._id)) {
       throw new BadRequestException('ID không hợp lệ');
     }
 
-    const account = await this.accountStudentModel.findById(data._id);
+    const account = await this.accountEmployeeModel.findById(data._id);
 
     if (!account) {
       throw new NotFoundException('Tài khoản không tồn tại');
@@ -141,7 +139,7 @@ export class AccountStudentsService {
 
     const hashedPassword = await hashPasswordHelper(data.newPassword);
 
-    const result = await this.accountStudentModel.updateOne(
+    const result = await this.accountEmployeeModel.updateOne(
       { _id: data._id },
       { $set: { password: hashedPassword } },
     );

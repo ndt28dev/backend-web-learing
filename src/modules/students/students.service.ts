@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -98,7 +102,6 @@ export class StudentsService {
     if (filter.current) delete filter.current;
     if (filter.pageSize) delete filter.pageSize;
 
-    // 👉 CHỈ lấy student chưa bị ẩn
     filter.is_hidden = false;
 
     if (!current) current = 1;
@@ -114,7 +117,6 @@ export class StudentsService {
       .limit(pageSize)
       .skip(skip)
       .sort(sort as any)
-      .select('-password')
       .exec();
 
     return {
@@ -136,6 +138,26 @@ export class StudentsService {
   }
 
   async updateIsHidden(id: string, isHidden: boolean) {
+    if (!mongoose.isValidObjectId(id)) {
+      throw new BadRequestException('ID không hợp lệ');
+    }
+
+    const student = await this.studentsModel.findById(id);
+    if (!student) {
+      throw new NotFoundException('Không tìm thấy học viên');
+    }
+
+    const accountStudent =
+      await this.accountStudentsService.findOneByUsernameAndByStudentId(
+        student._id.toString(),
+        student.code,
+      );
+
+    await this.accountStudentsService.updateIsHidden(
+      accountStudent._id.toString(),
+      isHidden,
+    );
+
     return this.studentsModel.updateOne({ _id: id }, { is_hidden: isHidden });
   }
 
@@ -149,6 +171,21 @@ export class StudentsService {
     if (validIds.length === 0) {
       throw new BadRequestException('Không có ID hợp lệ');
     }
+
+    const students = await this.studentsModel.find({ _id: { $in: validIds } });
+
+    const accounts = await Promise.all(
+      students.map((s) =>
+        this.accountStudentsService.findOneByUsernameAndByStudentId(
+          s._id.toString(),
+          s.code,
+        ),
+      ),
+    );
+
+    const accountIds = accounts.map((a) => a._id.toString());
+
+    await this.accountStudentsService.updateManyIsHidden(accountIds, isHidden);
 
     const result = await this.studentsModel.updateMany(
       { _id: { $in: validIds } },
@@ -168,6 +205,19 @@ export class StudentsService {
       throw new BadRequestException('ID không hợp lệ');
     }
 
+    const student = await this.studentsModel.findById(id);
+    if (!student) {
+      throw new NotFoundException('Không tìm thấy học viên');
+    }
+
+    const account =
+      await this.accountStudentsService.findOneByUsernameAndByStudentId(
+        student._id.toString(),
+        student.code,
+      );
+
+    await this.accountStudentsService.remove(account._id.toString());
+
     return this.studentsModel.deleteOne({ _id: id });
   }
 
@@ -176,10 +226,27 @@ export class StudentsService {
       throw new BadRequestException('Danh sách ID không hợp lệ');
     }
 
-    const invalidIds = ids.filter((id) => !mongoose.isValidObjectId(id));
-    if (invalidIds.length > 0) {
-      throw new BadRequestException('Có ID không hợp lệ');
+    const validIds = ids.filter((id) => mongoose.isValidObjectId(id));
+    if (validIds.length === 0) {
+      throw new BadRequestException('Không có ID hợp lệ');
     }
+
+    const students = await this.studentsModel.find({
+      _id: { $in: validIds },
+    });
+
+    const accounts = await Promise.all(
+      students.map((s) =>
+        this.accountStudentsService.findOneByUsernameAndByStudentId(
+          s._id.toString(),
+          s.code,
+        ),
+      ),
+    );
+
+    const accountIds = accounts.map((a) => a._id.toString());
+
+    await this.accountStudentsService.removeMany(accountIds);
 
     return this.studentsModel.deleteMany({
       _id: { $in: ids },
@@ -322,6 +389,7 @@ export class StudentsService {
       { header: 'Ngày sinh', key: 'birthday', width: 10 },
       { header: 'Email', key: 'email', width: 30 },
       { header: 'Số điện thoại', key: 'phone', width: 30 },
+      { header: 'Địa chỉ', key: 'address', width: 40 },
       { header: 'Trình độ', key: 'educationLevel', width: 20 },
       { header: 'Lớp học', key: 'educationClass', width: 20 },
       { header: 'Trường học', key: 'educationSchool', width: 20 },
@@ -337,6 +405,7 @@ export class StudentsService {
         birthday: s.birthday,
         email: s.email,
         phone: s.phone,
+        address: s.address,
         educationLevel:
           s.educationLevel === 'PRIMARY'
             ? 'Tiểu học'

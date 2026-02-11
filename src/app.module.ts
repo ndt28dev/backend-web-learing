@@ -10,10 +10,15 @@ import { JwtAuthGuard } from './auth/passport/jwt-auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { TransformInterceptor } from './core/transform.interceptor';
-import { Student } from './modules/students/entities/student.schema';
 import { StudentsModule } from './modules/students/students.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { AccountStudentsModule } from './modules/account_students/account_students.module';
+import { TeachersModule } from './modules/teachers/teachers.module';
+import { AccountTeachersModule } from './modules/account_teachers/account_teachers.module';
+import { Employee } from './modules/employees/entities/employee.schema';
+import { EmployeesModule } from './modules/employees/employees.module';
+import { AccountEmployee } from './modules/account_employees/entities/account_employee.schema';
+import { AccountEmployeesModule } from './modules/account_employees/account_employees.module';
 
 @Module({
   imports: [
@@ -22,9 +27,13 @@ import { AccountStudentsModule } from './modules/account_students/account_studen
     }),
     UsersModule,
     StudentsModule,
+    TeachersModule,
+    EmployeesModule,
     RolesModule,
     AuthModule,
     AccountStudentsModule,
+    AccountTeachersModule,
+    AccountEmployeesModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

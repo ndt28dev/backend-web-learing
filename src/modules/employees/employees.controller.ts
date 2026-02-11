@@ -7,36 +7,36 @@ import {
   Param,
   Delete,
   Query,
+  Res,
   UseInterceptors,
   UploadedFile,
   BadRequestException,
-  Res,
 } from '@nestjs/common';
-import { TeachersService } from './teachers.service';
-import { CreateTeacherDto } from './dto/create-teacher.dto';
-import { UpdateTeacherDto } from './dto/update-teacher.dto';
+import { EmployeesService } from './employees.service';
+import { CreateEmployeeDto } from './dto/create-employee.dto';
+import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { Public } from '../../decorator/customize';
-import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
 
-@Controller('teachers')
-export class TeachersController {
-  constructor(private readonly teachersService: TeachersService) {}
+@Controller('employees')
+export class EmployeesController {
+  constructor(private readonly employeesService: EmployeesService) {}
 
   @Public()
   @Post()
-  create(@Body() createTeacherDto: CreateTeacherDto) {
-    return this.teachersService.create(createTeacherDto);
+  create(@Body() createEmployeeDto: CreateEmployeeDto) {
+    return this.employeesService.create(createEmployeeDto);
   }
 
   @Public()
   @Get()
-  async findAll(
+  findAll(
     @Query() query: string,
     @Query('current') current: string,
     @Query('pageSize') pageSize: string,
   ) {
-    return this.teachersService.findAll(query, +current, +pageSize);
+    return this.employeesService.findAll(query, +current, +pageSize);
   }
 
   @Public()
@@ -46,71 +46,71 @@ export class TeachersController {
     @Query('current') current: string,
     @Query('pageSize') pageSize: string,
   ) {
-    return this.teachersService.findAllHistory(query, +current, +pageSize);
+    return this.employeesService.findAllHistory(query, +current, +pageSize);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.teachersService.findOne(+id);
+    return this.employeesService.findOne(+id);
   }
 
   @Public()
   @Patch()
-  update(@Body() updateTeacherDto: UpdateTeacherDto) {
-    return this.teachersService.update(updateTeacherDto);
+  update(@Body() updateEmployeeDto: UpdateEmployeeDto) {
+    return this.employeesService.update(updateEmployeeDto);
   }
 
   @Public()
   @Patch(':id/hide')
   hide(@Param('id') id: string) {
-    return this.teachersService.updateIsHidden(id, false);
+    return this.employeesService.updateIsHidden(id, false);
   }
 
   @Public()
   @Patch(':id/restore')
   restore(@Param('id') id: string) {
-    return this.teachersService.updateIsHidden(id, true);
+    return this.employeesService.updateIsHidden(id, true);
   }
 
   @Public()
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.teachersService.remove(id);
+    return this.employeesService.remove(id);
   }
 
   @Public()
   @Delete()
   removeMany(@Body('ids') ids: string[]) {
-    return this.teachersService.removeMany(ids);
+    return this.employeesService.removeMany(ids);
   }
 
   @Public()
   @Patch('hide-many')
   hideMany(@Body('ids') ids: string[]) {
-    return this.teachersService.updateManyIsHidden(ids, false);
+    return this.employeesService.updateManyIsHidden(ids, false);
   }
 
   @Public()
   @Patch('restore-many')
   restoreMany(@Body('ids') ids: string[]) {
-    return this.teachersService.updateManyIsHidden(ids, true);
+    return this.employeesService.updateManyIsHidden(ids, true);
   }
 
   @Public()
   @Post('import')
   @UseInterceptors(FileInterceptor('file'))
-  async importTeachers(@UploadedFile() file: Express.Multer.File) {
+  async importStudents(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('File không tồn tại');
     }
 
-    return this.teachersService.importFromExcel(file);
+    return this.employeesService.importFromExcel(file);
   }
 
   @Public()
   @Post('export')
-  async exportTeachers(@Res() res: Response) {
-    const buffer = await this.teachersService.exportToExcel();
+  async exportStudents(@Res() res: Response) {
+    const buffer = await this.employeesService.exportToExcel();
 
     res.setHeader(
       'Content-Type',
@@ -118,7 +118,7 @@ export class TeachersController {
     );
     res.setHeader(
       'Content-Disposition',
-      'attachment; filename="teachers.xlsx"',
+      'attachment; filename="students.xlsx"',
     );
 
     return res.send(buffer);

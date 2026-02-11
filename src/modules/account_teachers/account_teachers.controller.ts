@@ -1,20 +1,40 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { AccountTeachersService } from './account_teachers.service';
-import { CreateAccountTeacherDto } from './dto/create-account_teacher.dto';
+import {
+  ChangePasswordAccountTeacherDto,
+  CreateAccountTeacherDto,
+} from './dto/create-account_teacher.dto';
 import { UpdateAccountTeacherDto } from './dto/update-account_teacher.dto';
+import { Public } from '../../decorator/customize';
 
 @Controller('account-teachers')
 export class AccountTeachersController {
-  constructor(private readonly accountTeachersService: AccountTeachersService) {}
+  constructor(
+    private readonly accountTeachersService: AccountTeachersService,
+  ) {}
 
   @Post()
   create(@Body() createAccountTeacherDto: CreateAccountTeacherDto) {
     return this.accountTeachersService.create(createAccountTeacherDto);
   }
 
+  @Public()
   @Get()
-  findAll() {
-    return this.accountTeachersService.findAll();
+  async findAll(
+    @Query() query: string,
+    @Query('current') current: string,
+    @Query('pageSize') pageSize: string,
+  ) {
+    return this.accountTeachersService.findAll(query, +current, +pageSize);
   }
 
   @Get(':id')
@@ -22,13 +42,15 @@ export class AccountTeachersController {
     return this.accountTeachersService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAccountTeacherDto: UpdateAccountTeacherDto) {
-    return this.accountTeachersService.update(+id, updateAccountTeacherDto);
-  }
-
+  @Public()
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.accountTeachersService.remove(+id);
+    return this.accountTeachersService.remove(id);
+  }
+
+  @Public()
+  @Patch('change-password')
+  async changePassword(@Body() data: ChangePasswordAccountTeacherDto) {
+    return this.accountTeachersService.changePassword(data);
   }
 }

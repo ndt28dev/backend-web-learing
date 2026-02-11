@@ -1,12 +1,11 @@
 import { IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Types } from 'mongoose';
 
 export class CreateAccountStudentDto {
   @IsNotEmpty({ message: 'studentId không được để trống' })
   @IsMongoId()
   student!: string;
 
-  @IsNotEmpty({ message: 'Mã học viên không được để trống' })
+  @IsNotEmpty({ message: 'Tài khoản không được để trống' })
   username!: string;
 
   @IsNotEmpty({ message: 'Mật khẩu không được để trống' })

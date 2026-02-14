@@ -1,0 +1,6 @@
+export enum VerificationStatus {
+  REGISTERED = 'REGISTERED',
+  PENDING = 'PENDING',
+  VERIFIED = 'VERIFIED',
+  CANCELLED = 'CANCELLED',
+}

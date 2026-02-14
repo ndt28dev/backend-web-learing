@@ -41,7 +41,7 @@ export class StudentsService {
     return false;
   };
 
-  async create(createStudentDto: CreateStudentDto) {
+  async create(createStudentDto: any) {
     const isCodeExists = await this.isCodeExists(createStudentDto.code);
     if (isCodeExists) {
       throw new BadRequestException('Mã học viên đã tồn tại');
@@ -147,14 +147,8 @@ export class StudentsService {
       throw new NotFoundException('Không tìm thấy học viên');
     }
 
-    const accountStudent =
-      await this.accountStudentsService.findOneByUsernameAndByStudentId(
-        student._id.toString(),
-        student.code,
-      );
-
-    await this.accountStudentsService.updateIsHidden(
-      accountStudent._id.toString(),
+    await this.accountStudentsService.updateIsHiddenByStudent(
+      student._id.toString(),
       isHidden,
     );
 
@@ -174,30 +168,17 @@ export class StudentsService {
 
     const students = await this.studentsModel.find({ _id: { $in: validIds } });
 
-    const accounts = await Promise.all(
-      students.map((s) =>
-        this.accountStudentsService.findOneByUsernameAndByStudentId(
-          s._id.toString(),
-          s.code,
-        ),
-      ),
+    const studentsIds = students.map((t) => t._id.toString());
+
+    await this.accountStudentsService.updateManyIsHiddenByStudents(
+      studentsIds,
+      isHidden,
     );
 
-    const accountIds = accounts.map((a) => a._id.toString());
-
-    await this.accountStudentsService.updateManyIsHidden(accountIds, isHidden);
-
-    const result = await this.studentsModel.updateMany(
+    return this.studentsModel.updateMany(
       { _id: { $in: validIds } },
       { $set: { is_hidden: isHidden } },
     );
-
-    return {
-      message: isHidden
-        ? `Đã ẩn ${result.modifiedCount} học viên`
-        : `Đã khôi phục ${result.modifiedCount} học viên`,
-      modifiedCount: result.modifiedCount,
-    };
   }
 
   async remove(id: string) {
@@ -210,13 +191,7 @@ export class StudentsService {
       throw new NotFoundException('Không tìm thấy học viên');
     }
 
-    const account =
-      await this.accountStudentsService.findOneByUsernameAndByStudentId(
-        student._id.toString(),
-        student.code,
-      );
-
-    await this.accountStudentsService.remove(account._id.toString());
+    await this.accountStudentsService.removeByStudent(student._id.toString());
 
     return this.studentsModel.deleteOne({ _id: id });
   }
@@ -235,18 +210,9 @@ export class StudentsService {
       _id: { $in: validIds },
     });
 
-    const accounts = await Promise.all(
-      students.map((s) =>
-        this.accountStudentsService.findOneByUsernameAndByStudentId(
-          s._id.toString(),
-          s.code,
-        ),
-      ),
-    );
+    const studentsIds = students.map((t) => t._id.toString());
 
-    const accountIds = accounts.map((a) => a._id.toString());
-
-    await this.accountStudentsService.removeMany(accountIds);
+    await this.accountStudentsService.removeManyByStudents(studentsIds);
 
     return this.studentsModel.deleteMany({
       _id: { $in: ids },

@@ -73,33 +73,20 @@ export class AccountEmployeesService {
     return `This action returns a #${id} accountEmployee`;
   }
 
-  async findOneByUsernameAndByEmployeeId(employeeId: string, username: string) {
-    const account = await this.accountEmployeeModel.findOne({
-      employee: employeeId,
-      username,
-    });
-
-    if (!account) {
-      throw new NotFoundException('Không tìm thấy tài khoản');
-    }
-
-    return account;
-  }
-
   update(id: number, updateAccountEmployeeDto: UpdateAccountEmployeeDto) {
     return `This action updates a #${id} accountEmployee`;
   }
 
-  async updateIsHidden(id: string, isHidden: boolean) {
-    return this.accountEmployeeModel.updateOne(
-      { _id: id },
+  async updateIsHiddenByEmployee(id: string, isHidden: boolean) {
+    return this.accountEmployeeModel.updateMany(
+      { employee: id },
       { is_hidden: isHidden },
     );
   }
 
-  async updateManyIsHidden(ids: string[], isHidden: boolean) {
+  async updateManyIsHiddenByEmployees(ids: string[], isHidden: boolean) {
     return this.accountEmployeeModel.updateMany(
-      { _id: { $in: ids } },
+      { employee: { $in: ids } },
       { $set: { is_hidden: isHidden } },
     );
   }
@@ -108,8 +95,12 @@ export class AccountEmployeesService {
     return this.accountEmployeeModel.deleteOne({ _id: id });
   }
 
-  async removeMany(ids: string[]) {
-    return this.accountEmployeeModel.deleteMany({ _id: { $in: ids } });
+  async removeByEmployee(id: string) {
+    return this.accountEmployeeModel.deleteMany({ employee: id });
+  }
+
+  async removeManyByEmployees(ids: string[]) {
+    return this.accountEmployeeModel.deleteMany({ employee: { $in: ids } });
   }
 
   async changePassword(data: ChangePasswordAccountEmployeeDto) {

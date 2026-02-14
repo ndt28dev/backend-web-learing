@@ -9,8 +9,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { AccountEmployeesService } from './account_employees.service';
-import { CreateAccountEmployeeDto } from './dto/create-account_employee.dto';
+import {
+  ChangePasswordAccountEmployeeDto,
+  CreateAccountEmployeeDto,
+} from './dto/create-account_employee.dto';
 import { UpdateAccountEmployeeDto } from './dto/update-account_employee.dto';
+import { Public } from '../../decorator/customize';
 
 @Controller('account-employees')
 export class AccountEmployeesController {
@@ -23,6 +27,7 @@ export class AccountEmployeesController {
     return this.accountEmployeesService.create(createAccountEmployeeDto);
   }
 
+  @Public()
   @Get()
   findAll(
     @Query() query: string,
@@ -37,16 +42,15 @@ export class AccountEmployeesController {
     return this.accountEmployeesService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateAccountEmployeeDto: UpdateAccountEmployeeDto,
-  ) {
-    return this.accountEmployeesService.update(+id, updateAccountEmployeeDto);
-  }
-
+  @Public()
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.accountEmployeesService.remove(id);
+  }
+
+  @Public()
+  @Patch('change-password')
+  async changePassword(@Body() data: ChangePasswordAccountEmployeeDto) {
+    return this.accountEmployeesService.changePassword(data);
   }
 }

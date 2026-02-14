@@ -18,6 +18,8 @@ import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { Public } from '../../decorator/customize';
 import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('employees')
 export class EmployeesController {
@@ -25,8 +27,27 @@ export class EmployeesController {
 
   @Public()
   @Post()
-  create(@Body() createEmployeeDto: CreateEmployeeDto) {
-    return this.employeesService.create(createEmployeeDto);
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/employees',
+        filename: (req, file, callback) => {
+          const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          callback(null, uniqueName + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createEmployeeDto: CreateEmployeeDto,
+  ) {
+    const avatar = file ? `/uploads/employees/${file.filename}` : null;
+
+    return this.employeesService.create({
+      ...createEmployeeDto,
+      avatar,
+    });
   }
 
   @Public()
@@ -56,8 +77,31 @@ export class EmployeesController {
 
   @Public()
   @Patch()
-  update(@Body() updateEmployeeDto: UpdateEmployeeDto) {
-    return this.employeesService.update(updateEmployeeDto);
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/employees',
+        filename: (req, file, callback) => {
+          const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          callback(null, uniqueName + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  async update(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() updateEmployeeDto: UpdateEmployeeDto,
+  ) {
+    let avatar = updateEmployeeDto.avatar;
+
+    if (file) {
+      avatar = `/uploads/employees/${file.filename}`;
+    }
+
+    return this.employeesService.update({
+      ...updateEmployeeDto,
+      avatar,
+    });
   }
 
   @Public()

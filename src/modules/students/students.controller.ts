@@ -18,7 +18,8 @@ import { UpdateStudentDto } from './dto/update-student.dto';
 import { Public } from '../../decorator/customize';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
-import { Multer } from 'multer';
+import { diskStorage, Multer } from 'multer';
+import { extname } from 'path';
 
 @Controller('students')
 export class StudentsController {
@@ -26,8 +27,27 @@ export class StudentsController {
 
   @Public()
   @Post()
-  create(@Body() createStudentDto: CreateStudentDto) {
-    return this.studentsService.create(createStudentDto);
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/students',
+        filename: (req, file, callback) => {
+          const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          callback(null, uniqueName + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createStudentDto: CreateStudentDto,
+  ) {
+    const avatar = file ? `/uploads/students/${file.filename}` : null;
+
+    return this.studentsService.create({
+      ...createStudentDto,
+      avatar,
+    });
   }
 
   @Public()
@@ -57,8 +77,31 @@ export class StudentsController {
 
   @Public()
   @Patch()
-  update(@Body() updateStudentDto: UpdateStudentDto) {
-    return this.studentsService.update(updateStudentDto);
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/students',
+        filename: (req, file, callback) => {
+          const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          callback(null, uniqueName + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  async update(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() updateStudentDto: UpdateStudentDto,
+  ) {
+    let avatar = updateStudentDto.avatar;
+
+    if (file) {
+      avatar = `/uploads/students/${file.filename}`;
+    }
+
+    return this.studentsService.update({
+      ...updateStudentDto,
+      avatar,
+    });
   }
 
   @Public()

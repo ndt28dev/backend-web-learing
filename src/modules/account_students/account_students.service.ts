@@ -75,33 +75,20 @@ export class AccountStudentsService {
     return `This action returns a #${id} accountStudent`;
   }
 
-  async findOneByUsernameAndByStudentId(studentId: string, username: string) {
-    const account = await this.accountStudentModel.findOne({
-      student: studentId,
-      username,
-    });
-
-    if (!account) {
-      throw new NotFoundException('Không tìm thấy tài khoản');
-    }
-
-    return account;
-  }
-
   update(id: number, updateAccountStudentDto: UpdateAccountStudentDto) {
     return `This action updates a #${id} accountStudent`;
   }
 
-  async updateIsHidden(id: string, isHidden: boolean) {
-    return this.accountStudentModel.updateOne(
-      { _id: id },
-      { is_hidden: isHidden },
+  async updateIsHiddenByStudent(id: string, isHidden: boolean) {
+    return this.accountStudentModel.updateMany(
+      { student: id },
+      { $set: { is_hidden: isHidden } },
     );
   }
 
-  async updateManyIsHidden(ids: string[], isHidden: boolean) {
+  async updateManyIsHiddenByStudents(ids: string[], isHidden: boolean) {
     return this.accountStudentModel.updateMany(
-      { _id: { $in: ids } },
+      { student: { $in: ids } },
       { $set: { is_hidden: isHidden } },
     );
   }
@@ -110,8 +97,12 @@ export class AccountStudentsService {
     return this.accountStudentModel.deleteOne({ _id: id });
   }
 
-  async removeMany(ids: string[]) {
-    return this.accountStudentModel.deleteMany({ _id: { $in: ids } });
+  async removeByStudent(id: string) {
+    return this.accountStudentModel.deleteMany({ student: id });
+  }
+
+  async removeManyByStudents(ids: string[]) {
+    return this.accountStudentModel.deleteMany({ teacher: { $in: ids } });
   }
 
   async changePassword(data: ChangePasswordAccountStudentDto) {

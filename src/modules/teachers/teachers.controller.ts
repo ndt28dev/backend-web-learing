@@ -18,6 +18,8 @@ import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { Public } from '../../decorator/customize';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('teachers')
 export class TeachersController {
@@ -25,8 +27,27 @@ export class TeachersController {
 
   @Public()
   @Post()
-  create(@Body() createTeacherDto: CreateTeacherDto) {
-    return this.teachersService.create(createTeacherDto);
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/teachers',
+        filename: (req, file, callback) => {
+          const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          callback(null, uniqueName + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createTeacherDto: CreateTeacherDto,
+  ) {
+    const avatar = file ? `/uploads/teachers/${file.filename}` : null;
+
+    return this.teachersService.create({
+      ...createTeacherDto,
+      avatar,
+    });
   }
 
   @Public()
@@ -56,8 +77,31 @@ export class TeachersController {
 
   @Public()
   @Patch()
-  update(@Body() updateTeacherDto: UpdateTeacherDto) {
-    return this.teachersService.update(updateTeacherDto);
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/teachers',
+        filename: (req, file, callback) => {
+          const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          callback(null, uniqueName + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  async update(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() updateTeacherDto: UpdateTeacherDto,
+  ) {
+    let avatar = updateTeacherDto.avatar;
+
+    if (file) {
+      avatar = `/uploads/teachers/${file.filename}`;
+    }
+
+    return this.teachersService.update({
+      ...updateTeacherDto,
+      avatar,
+    });
   }
 
   @Public()

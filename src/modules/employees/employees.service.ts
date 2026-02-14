@@ -43,7 +43,7 @@ export class EmployeesService {
     return false;
   };
 
-  async create(createEmployeeDto: CreateEmployeeDto) {
+  async create(createEmployeeDto: any) {
     const isCodeExists = await this.isCodeExists(createEmployeeDto.code);
     if (isCodeExists) {
       throw new BadRequestException('Mã nhân viên đã tồn tại');
@@ -151,14 +151,8 @@ export class EmployeesService {
       throw new NotFoundException('Không tìm thấy nhân viên');
     }
 
-    const accountStudent =
-      await this.accountEmployeesService.findOneByUsernameAndByEmployeeId(
-        student._id.toString(),
-        student.code,
-      );
-
-    await this.accountEmployeesService.updateIsHidden(
-      accountStudent._id.toString(),
+    await this.accountEmployeesService.updateIsHiddenByEmployee(
+      student._id.toString(),
       isHidden,
     );
 
@@ -176,32 +170,21 @@ export class EmployeesService {
       throw new BadRequestException('Không có ID hợp lệ');
     }
 
-    const students = await this.employeesModel.find({ _id: { $in: validIds } });
+    const employees = await this.employeesModel.find({
+      _id: { $in: validIds },
+    });
 
-    const accounts = await Promise.all(
-      students.map((s) =>
-        this.accountEmployeesService.findOneByUsernameAndByEmployeeId(
-          s._id.toString(),
-          s.code,
-        ),
-      ),
+    const employeeIds = employees.map((t) => t._id.toString());
+
+    await this.accountEmployeesService.updateManyIsHiddenByEmployees(
+      employeeIds,
+      isHidden,
     );
 
-    const accountIds = accounts.map((a) => a._id.toString());
-
-    await this.accountEmployeesService.updateManyIsHidden(accountIds, isHidden);
-
-    const result = await this.employeesModel.updateMany(
+    return this.employeesModel.updateMany(
       { _id: { $in: validIds } },
       { $set: { is_hidden: isHidden } },
     );
-
-    return {
-      message: isHidden
-        ? `Đã ẩn ${result.modifiedCount} nhân viên`
-        : `Đã khôi phục ${result.modifiedCount} nhân viên`,
-      modifiedCount: result.modifiedCount,
-    };
   }
 
   async remove(id: string) {
@@ -214,13 +197,7 @@ export class EmployeesService {
       throw new NotFoundException('Không tìm thấy nhân viên');
     }
 
-    const account =
-      await this.accountEmployeesService.findOneByUsernameAndByEmployeeId(
-        student._id.toString(),
-        student.code,
-      );
-
-    await this.accountEmployeesService.remove(account._id.toString());
+    await this.accountEmployeesService.removeByEmployee(student._id.toString());
 
     return this.employeesModel.deleteOne({ _id: id });
   }
@@ -235,22 +212,13 @@ export class EmployeesService {
       throw new BadRequestException('Không có ID hợp lệ');
     }
 
-    const students = await this.employeesModel.find({
+    const employees = await this.employeesModel.find({
       _id: { $in: validIds },
     });
 
-    const accounts = await Promise.all(
-      students.map((s) =>
-        this.accountEmployeesService.findOneByUsernameAndByEmployeeId(
-          s._id.toString(),
-          s.code,
-        ),
-      ),
-    );
+    const employeeIds = employees.map((a) => a._id.toString());
 
-    const accountIds = accounts.map((a) => a._id.toString());
-
-    await this.accountEmployeesService.removeMany(accountIds);
+    await this.accountEmployeesService.removeManyByEmployees(employeeIds);
 
     return this.employeesModel.deleteMany({
       _id: { $in: ids },

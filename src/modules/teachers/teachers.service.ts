@@ -16,12 +16,14 @@ import {
   REQUIRED_COLUMNS,
   TEACHER_COLUMNS,
 } from './constants/teacher-import.constant';
+import { CertificatesTeacherService } from '../certificates_teacher/certificates_teacher.service';
 
 @Injectable()
 export class TeachersService {
   constructor(
     @InjectModel(Teacher.name) private teachersModel: Model<Teacher>,
     private readonly accountTeachersService: AccountTeachersService,
+    private readonly certificatesTeacherService: CertificatesTeacherService,
   ) {}
 
   isEmailExists = async (email: string) => {
@@ -40,7 +42,7 @@ export class TeachersService {
     return false;
   };
 
-  async create(createTeacherDto: CreateTeacherDto) {
+  async create(createTeacherDto: any) {
     const isCodeExists = await this.isCodeExists(createTeacherDto.code);
     if (isCodeExists) {
       throw new BadRequestException('Mã học viên đã tồn tại');
@@ -146,16 +148,12 @@ export class TeachersService {
       throw new NotFoundException('Không tìm thấy giáo viên');
     }
 
-    const accountStudent =
-      await this.accountTeachersService.findOneByUsernameAndByTeacherId(
-        teacher._id.toString(),
-        teacher.code,
-      );
-
-    await this.accountTeachersService.updateIsHidden(
-      accountStudent._id.toString(),
+    await this.accountTeachersService.updateIsHiddenByTeacher(
+      teacher._id.toString(),
       isHidden,
     );
+
+    await this.certificatesTeacherService.updateHiddenByTeacher(id, isHidden);
 
     return this.teachersModel.updateOne({ _id: id }, { is_hidden: isHidden });
   }
@@ -171,32 +169,26 @@ export class TeachersService {
       throw new BadRequestException('Không có ID hợp lệ');
     }
 
-    const teachers = await this.teachersModel.find({ _id: { $in: validIds } });
+    const teachers = await this.teachersModel.find({
+      _id: { $in: validIds },
+    });
 
-    const accounts = await Promise.all(
-      teachers.map((s) =>
-        this.accountTeachersService.findOneByUsernameAndByTeacherId(
-          s._id.toString(),
-          s.code,
-        ),
-      ),
+    const teacherIds = teachers.map((t) => t._id.toString());
+
+    await this.accountTeachersService.updateManyIsHiddenByTeachers(
+      teacherIds,
+      isHidden,
     );
 
-    const accountIds = accounts.map((a) => a._id.toString());
+    await this.certificatesTeacherService.updateHiddenByTeachers(
+      teacherIds,
+      isHidden,
+    );
 
-    await this.accountTeachersService.updateManyIsHidden(accountIds, isHidden);
-
-    const result = await this.teachersModel.updateMany(
+    return this.teachersModel.updateMany(
       { _id: { $in: validIds } },
       { $set: { is_hidden: isHidden } },
     );
-
-    return {
-      message: isHidden
-        ? `Đã ẩn ${result.modifiedCount} giáo viên`
-        : `Đã khôi phục ${result.modifiedCount} giáo viên`,
-      modifiedCount: result.modifiedCount,
-    };
   }
 
   async remove(id: string) {
@@ -209,13 +201,11 @@ export class TeachersService {
       throw new NotFoundException('Không tìm thấy học viên');
     }
 
-    const account =
-      await this.accountTeachersService.findOneByUsernameAndByTeacherId(
-        teacher._id.toString(),
-        teacher.code,
-      );
+    await this.accountTeachersService.removeByTeacher(teacher._id.toString());
 
-    await this.accountTeachersService.remove(account._id.toString());
+    await this.certificatesTeacherService.removeByTeacher(
+      teacher._id.toString(),
+    );
 
     return this.teachersModel.deleteOne({ _id: id });
   }
@@ -230,22 +220,15 @@ export class TeachersService {
       throw new BadRequestException('Không có ID hợp lệ');
     }
 
-    const students = await this.teachersModel.find({
+    const teachers = await this.teachersModel.find({
       _id: { $in: validIds },
     });
 
-    const accounts = await Promise.all(
-      students.map((s) =>
-        this.accountTeachersService.findOneByUsernameAndByTeacherId(
-          s._id.toString(),
-          s.code,
-        ),
-      ),
-    );
+    const teachersIds = teachers.map((a) => a._id.toString());
 
-    const accountIds = accounts.map((a) => a._id.toString());
+    await this.accountTeachersService.removeManyByTeachers(teachersIds);
 
-    await this.accountTeachersService.removeMany(accountIds);
+    await this.certificatesTeacherService.removeByTeachers(teachersIds);
 
     return this.teachersModel.deleteMany({
       _id: { $in: ids },

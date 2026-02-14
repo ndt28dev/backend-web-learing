@@ -19,6 +19,10 @@ import { Employee } from './modules/employees/entities/employee.schema';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { AccountEmployee } from './modules/account_employees/entities/account_employee.schema';
 import { AccountEmployeesModule } from './modules/account_employees/account_employees.module';
+import { Certificate } from 'crypto';
+import { CertificatesTeacherModule } from './modules/certificates_teacher/certificates_teacher.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -34,6 +38,7 @@ import { AccountEmployeesModule } from './modules/account_employees/account_empl
     AccountStudentsModule,
     AccountTeachersModule,
     AccountEmployeesModule,
+    CertificatesTeacherModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -67,6 +72,10 @@ import { AccountEmployeesModule } from './modules/account_employees/account_empl
         },
       }),
       inject: [ConfigService],
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
     }),
   ],
   controllers: [AppController],

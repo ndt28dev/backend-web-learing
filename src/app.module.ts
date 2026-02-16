@@ -23,6 +23,8 @@ import { Certificate } from 'crypto';
 import { CertificatesTeacherModule } from './modules/certificates_teacher/certificates_teacher.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { TrainingProgram } from './modules/training_programs/entities/training_program.schema';
+import { TrainingProgramsModule } from './modules/training_programs/training_programs.module';
 
 @Module({
   imports: [
@@ -39,6 +41,7 @@ import { join } from 'path';
     AccountTeachersModule,
     AccountEmployeesModule,
     CertificatesTeacherModule,
+    TrainingProgramsModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
